@@ -5,6 +5,8 @@ import magic
 
 def getInput():
     n = int(input())
+    if n < 0 or n > 100:
+        return False
     data = []
     for i in range(n):
         data.append(json.loads(input()))
@@ -30,10 +32,10 @@ def sort(data, left, right):
         
 def validateTransaction(transaction):
     try:
-        lat = int(transaction["location"]["lat"])
+        lat = float(transaction["location"]["lat"])
         if lat < -90 or lat > 90:
             return False
-        lon = int(transaction["location"]["lon"])
+        lon = float(transaction["location"]["lon"])
         if lon < -180 or lon > 180:
             return False
     except:
@@ -82,6 +84,8 @@ def getDeviceStranger(transaction1, transaction2):
 
 def main():
     data = getInput()
+    if data == False:
+        return False
     sort(data, 0, len(data) - 1)
 
     flags = []
