@@ -1,1 +1,1 @@
-[{\"tx_id\": \"T5\", \"reason\": \"FREQ_SPIKE\"}]
+[{"tx_id": "T5", "reason": "FREQ_SPIKE"}]
