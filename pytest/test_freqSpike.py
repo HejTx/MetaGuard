@@ -1,0 +1,10 @@
+import pytest, json
+from main import freqSpike
+
+def test_freqSpike():
+    freq_spike = freqSpike()
+    assert freq_spike.check(json.loads('{"tx_id": "T1", "account_id": "A1", "timestamp": "2023-01-01T12:00:00", "amount": 1.0, "location": {"lat": 0.0, "lon": 0.0}, "device_id": "D1"}')) == False
+    assert freq_spike.check(json.loads('{"tx_id": "T2", "account_id": "A1", "timestamp": "2023-01-01T12:01:00", "amount": 1.0, "location": {"lat": 0.0, "lon": 0.0}, "device_id": "D1"}')) == False
+    assert freq_spike.check(json.loads('{"tx_id": "T3", "account_id": "A1", "timestamp": "2023-01-01T12:02:00", "amount": 1.0, "location": {"lat": 0.0, "lon": 0.0}, "device_id": "D1"}')) == False
+    assert freq_spike.check(json.loads('{"tx_id": "T4", "account_id": "A1", "timestamp": "2023-01-01T12:03:00", "amount": 1.0, "location": {"lat": 0.0, "lon": 0.0}, "device_id": "D1"}')) == False
+    assert freq_spike.check(json.loads('{"tx_id": "T5", "account_id": "A1", "timestamp": "2023-01-01T12:04:00", "amount": 1.0, "location": {"lat": 0.0, "lon": 0.0}, "device_id": "D1"}')) == True
