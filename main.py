@@ -64,7 +64,7 @@ def quicksort(data, left, right):
         quicksort(data, left, pivot - 1)
         quicksort(data, pivot + 1, right)
         
-def validate_transaction(transaction):
+def is_valid(transaction):
     """
     Validate geographic coordinates of a transaction.
 
@@ -190,15 +190,15 @@ def main():
     flags = []
     freq_spike = FreqSpike()
     for i in range(len(transactions)):
-        if not validate_transaction(transactions[i]):
+        if not is_valid(transactions[i]):
             continue
-        if i > 0 and validate_transaction(transactions[i - 1]) and check_geo_velocity(transactions[i - 1], transactions[i]):
+        if i > 0 and is_valid(transactions[i - 1]) and check_geo_velocity(transactions[i - 1], transactions[i]):
             flag = json.dumps({'tx_id': transactions[i]['tx_id'], 'reason': 'GEO_VELOCITY'})
             flags.append(flag)
         if freq_spike.check(transactions[i]):
             flag = json.dumps({'tx_id': transactions[i]['tx_id'], 'reason': 'FREQ_SPIKE'})
             flags.append(flag)
-        if i > 0 and validate_transaction(transactions[i - 1]) and is_device_stranger(transactions[i - 1], transactions[i]):
+        if i > 0 and is_valid(transactions[i - 1]) and is_device_stranger(transactions[i - 1], transactions[i]):
             flag = json.dumps({'tx_id': transactions[i]['tx_id'], 'reason': 'DEVICE_STRANGER'})
             flags.append(flag)
     print(flags)
