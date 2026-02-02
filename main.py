@@ -102,6 +102,8 @@ def check_geo_velocity(transaction1, transaction2):
     try:
         return (distance/time) > constants.MAX_SPD
     except ZeroDivisionError:
+        if distance == 0:
+            return False
         return True
     
 class FreqSpike:
