@@ -16,13 +16,16 @@ def get_input():
     Raises:
         ValueError: If the number of transactions is outside the allowed range.
     """
-    n = int(input())
-    if n < 0 or n > 10000:
-        return ValueError
-    data = []
-    for i in range(n):
-        data.append(json.loads(input()))
-    return data
+    try:
+        n = int(input())
+        if n < 0 or n > 10000:
+            raise ValueError(f"Invalid transaction count: {n}. Must be <0, 10000>.")
+        data = []
+        for i in range(n):
+            data.append(json.loads(input()))
+        return data
+    except:
+        raise ValueError(f"Invalid transaction count. Must be a singe number <0, 10000>.")
 
 def partition(data, left, right):
     """
@@ -182,8 +185,6 @@ def is_device_stranger(transaction1, transaction2):
 
 def main():
     data = get_input()
-    if data == ValueError:
-        return
     quicksort(data, 0, len(data) - 1)
 
     flags = []
