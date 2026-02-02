@@ -20,10 +20,10 @@ def get_input():
         n = int(input())
         if n < 0 or n > 10000:
             raise ValueError(f"Invalid transaction count: {n}. Must be <0, 10000>.")
-        data = []
+        transactions = []
         for i in range(n):
-            data.append(json.loads(input()))
-        return data
+            transactions.append(json.loads(input()))
+        return transactions
     except:
         raise ValueError(f"Invalid transaction count. Must be a singe number <0, 10000>.")
 
@@ -85,25 +85,25 @@ def validate_transaction(transaction):
         return False
     return True
 
-def haversine(lat1, lon1, lat2, lon2):
+def haversine(latitude1, longitude1, latitude2, longitude2):
     """
     Calculate the great-circle distance between two geographic points.
 
     Args:
-        lat1 (float): Latitude of the first point.
-        lon1 (float): Longitude of the first point.
-        lat2 (float): Latitude of the second point.
-        lon2 (float): Longitude of the second point.
+        latitude1 (float): Latitude of the first point.
+        longitude1 (float): Longitude of the first point.
+        latitude2 (float): Latitude of the second point.
+        longitude2 (float): Longitude of the second point.
 
     Returns:
         float: Distance between the two points.
     """
-    delta_lat = math.radians(lat1 - lat2)
-    delta_lon = math.radians(lon1 - lon2)
+    delta_latitude = math.radians(latitude1 - latitude2)
+    delta_longitude = math.radians(longitude1 - longitude2)
 
-    a = math.sin(delta_lat/2)**2 + math.cos(math.radians(lat1)) * math.cos(math.radians(lat2)) * math.sin(delta_lon/2)**2
-    dis = 2 * constants.R * math.asin(math.sqrt(a))
-    return dis
+    a = math.sin(delta_latitude/2)**2 + math.cos(math.radians(latitude1)) * math.cos(math.radians(latitude2)) * math.sin(delta_longitude/2)**2
+    distance = 2 * constants.R * math.asin(math.sqrt(a))
+    return distance
 
 def get_delta_time(transaction1, transaction2):
     """
@@ -133,11 +133,11 @@ def check_geo_velocity(transaction1, transaction2):
     Returns:
         bool: True if velocity exceeds the threshold, False otherwise.
     """
-    dis = haversine(transaction1["location"]["lat"], transaction1["location"]["lon"], transaction2["location"]["lat"], transaction2["location"]["lon"])
+    distance = haversine(transaction1["location"]["lat"], transaction1["location"]["lon"], transaction2["location"]["lat"], transaction2["location"]["lon"])
     time = get_delta_time(transaction1, transaction2)
 
     try:
-        return (dis/time) > constants.MAX_SPD
+        return (distance/time) > constants.MAX_SPD
     except ZeroDivisionError:
         return True
     
@@ -184,22 +184,22 @@ def is_device_stranger(transaction1, transaction2):
     return get_delta_time(transaction1, transaction2) * constants.HOUR_TO_SEC < constants.MAX_DS and transaction1["device_id"] != transaction2["device_id"]
 
 def main():
-    data = get_input()
-    quicksort(data, 0, len(data) - 1)
+    transactions = get_input()
+    quicksort(transactions, 0, len(transactions) - 1)
 
     flags = []
     freq_spike = FreqSpike()
-    for i in range(len(data)):
-        if not validate_transaction(data[i]):
+    for i in range(len(transactions)):
+        if not validate_transaction(transactions[i]):
             continue
-        if i > 0 and validate_transaction(data[i - 1]) and check_geo_velocity(data[i - 1], data[i]):
-            flag = json.dumps({'tx_id': data[i]['tx_id'], 'reason': 'GEO_VELOCITY'})
+        if i > 0 and validate_transaction(transactions[i - 1]) and check_geo_velocity(transactions[i - 1], transactions[i]):
+            flag = json.dumps({'tx_id': transactions[i]['tx_id'], 'reason': 'GEO_VELOCITY'})
             flags.append(flag)
-        if freq_spike.check(data[i]):
-            flag = json.dumps({'tx_id': data[i]['tx_id'], 'reason': 'FREQ_SPIKE'})
+        if freq_spike.check(transactions[i]):
+            flag = json.dumps({'tx_id': transactions[i]['tx_id'], 'reason': 'FREQ_SPIKE'})
             flags.append(flag)
-        if i > 0 and validate_transaction(data[i - 1]) and is_device_stranger(data[i - 1], data[i]):
-            flag = json.dumps({'tx_id': data[i]['tx_id'], 'reason': 'DEVICE_STRANGER'})
+        if i > 0 and validate_transaction(transactions[i - 1]) and is_device_stranger(transactions[i - 1], transactions[i]):
+            flag = json.dumps({'tx_id': transactions[i]['tx_id'], 'reason': 'DEVICE_STRANGER'})
             flags.append(flag)
     print(flags)
 
