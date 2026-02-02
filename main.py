@@ -26,43 +26,6 @@ def get_input():
         return transactions
     except:
         raise ValueError(f"Invalid transaction count. Must be a singe number <0, 10000>.")
-
-def partition(data, left, right):
-    """
-    Partition helper for quicksort based on transaction timestamps.
-
-    Args:
-        data (list): List of transaction dictionaries.
-        left (int): Left index of the partition range.
-        right (int): Right index of the partition range.
-
-    Returns:
-        int: Final index position of the pivot.
-    """
-    pivot = datetime.fromisoformat(data[right]["timestamp"])
-    i = left - 1
-    for j in range(left, right):
-        if datetime.fromisoformat(data[j]["timestamp"]) <= pivot:
-            i += 1
-            data[i], data[j] = data[j], data[i]
-    
-    data[right], data[i + 1] = data[i + 1], data[right]
-    return i + 1
-
-def quicksort(data, left, right):
-    """
-    Sort transactions in-place by timestamp using quicksort.
-
-    Args:
-        data (list): List of transaction dictionaries.
-        left (int): Left index of the sort range.
-        right (int): Right index of the sort range.
-    """
-    if left < right:
-        pivot = partition(data, left, right)
-
-        quicksort(data, left, pivot - 1)
-        quicksort(data, pivot + 1, right)
         
 def is_valid(transaction):
     """
@@ -185,7 +148,7 @@ def is_device_stranger(transaction1, transaction2):
 
 def main():
     transactions = get_input()
-    quicksort(transactions, 0, len(transactions) - 1)
+    transactions.sort(key=lambda x: x["timestamp"])
 
     flags = []
     freq_spike = FreqSpike()
