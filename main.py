@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 from collections import deque
 import magic
 
-def getInput():
+def get_input():
     """
     Read and parse JSON transaction input from stdin.
 
@@ -46,7 +46,7 @@ def partition(data, left, right):
     data[right], data[i + 1] = data[i + 1], data[right]
     return i + 1
 
-def sort(data, left, right):
+def quicksort(data, left, right):
     """
     Sort transactions in-place by timestamp using quicksort.
 
@@ -58,10 +58,10 @@ def sort(data, left, right):
     if left < right:
         pivot = partition(data, left, right)
 
-        sort(data, left, pivot - 1)
-        sort(data, pivot + 1, right)
+        quicksort(data, left, pivot - 1)
+        quicksort(data, pivot + 1, right)
         
-def validateTransaction(transaction):
+def validate_transaction(transaction):
     """
     Validate geographic coordinates of a transaction.
 
@@ -102,7 +102,7 @@ def haversine(lat1, lon1, lat2, lon2):
     dis = 2 * magic.R * math.asin(math.sqrt(a))
     return dis
 
-def getDeltaTime(transaction1, transaction2):
+def get_delta_time(transaction1, transaction2):
     """
     Compute the absolute time difference between two transactions in hours.
 
@@ -118,7 +118,7 @@ def getDeltaTime(transaction1, transaction2):
     delta_time = abs(time1 - time2).total_seconds()/magic.HOUR_TO_SEC
     return delta_time
 
-def getGeoVelocity(transaction1, transaction2):
+def check_geo_velocity(transaction1, transaction2):
     """
     Determine whether the geographic velocity between two transactions
     exceeds the maximum allowed speed.
@@ -131,14 +131,14 @@ def getGeoVelocity(transaction1, transaction2):
         bool: True if velocity exceeds the threshold, False otherwise.
     """
     dis = haversine(transaction1["location"]["lat"], transaction1["location"]["lon"], transaction2["location"]["lat"], transaction2["location"]["lon"])
-    time = getDeltaTime(transaction1, transaction2)
+    time = get_delta_time(transaction1, transaction2)
 
     try:
         return (dis/time) > magic.MAX_SPD
     except ZeroDivisionError:
         return True
     
-class freqSpike:
+class FreqSpike:
     """
     Detect transaction frequency spikes within a rolling time window.
     """
@@ -167,7 +167,7 @@ class freqSpike:
             
         return len(self.queue) >= magic.MAX_LENGTH
     
-def getDeviceStranger(transaction1, transaction2):
+def is_device_stranger(transaction1, transaction2):
     """
     Detect suspicious device switching between transactions.
 
@@ -178,26 +178,26 @@ def getDeviceStranger(transaction1, transaction2):
     Returns:
         bool: True if transactions are from different devices within a short time.
     """
-    return getDeltaTime(transaction1, transaction2) * magic.HOUR_TO_SEC < magic.MAX_DS and transaction1["device_id"] != transaction2["device_id"]
+    return get_delta_time(transaction1, transaction2) * magic.HOUR_TO_SEC < magic.MAX_DS and transaction1["device_id"] != transaction2["device_id"]
 
 def main():
-    data = getInput()
+    data = get_input()
     if data == ValueError:
         return
-    sort(data, 0, len(data) - 1)
+    quicksort(data, 0, len(data) - 1)
 
     flags = []
-    freq_spike = freqSpike()
+    freq_spike = FreqSpike()
     for i in range(len(data)):
-        if not validateTransaction(data[i]):
+        if not validate_transaction(data[i]):
             continue
-        if i > 0 and validateTransaction(data[i - 1]) and getGeoVelocity(data[i - 1], data[i]):
+        if i > 0 and validate_transaction(data[i - 1]) and check_geo_velocity(data[i - 1], data[i]):
             flag = json.dumps({'tx_id': data[i]['tx_id'], 'reason': 'GEO_VELOCITY'})
             flags.append(flag)
         if freq_spike.check(data[i]):
             flag = json.dumps({'tx_id': data[i]['tx_id'], 'reason': 'FREQ_SPIKE'})
             flags.append(flag)
-        if i > 0 and validateTransaction(data[i - 1]) and getDeviceStranger(data[i - 1], data[i]):
+        if i > 0 and validate_transaction(data[i - 1]) and is_device_stranger(data[i - 1], data[i]):
             flag = json.dumps({'tx_id': data[i]['tx_id'], 'reason': 'DEVICE_STRANGER'})
             flags.append(flag)
     print(flags)
