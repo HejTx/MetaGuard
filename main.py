@@ -10,6 +10,24 @@ def getInput():
         data.append(json.loads(input()))
     return data
 
+def partition(data, left, right):
+    pivot = datetime.fromisoformat(data[right]["timestamp"])
+    i = left - 1
+    for j in range(left, right):
+        if datetime.fromisoformat(data[j]["timestamp"]) <= pivot:
+            i += 1
+            data[i], data[j] = data[j], data[i]
+    
+    data[right], data[i + 1] = data[i + 1], data[right]
+    return i + 1
+
+def sort(data, left, right):
+    if left < right:
+        pivot = partition(data, left, right)
+
+        sort(data, left, pivot - 1)
+        sort(data, pivot + 1, right)
+        
 def haversine(lat1, lon1, lat2, lon2):
     delta_lat = math.radians(lat1 - lat2)
     delta_lon = math.radians(lon1 - lon2)
@@ -52,6 +70,7 @@ def getDeviceStranger(transaction1, transaction2):
 
 def main():
     data = getInput()
+    sort(data, 0, len(data) - 1)
 
     flags = []
     freq_spike = freqSpike()
