@@ -21,7 +21,7 @@ def haversine(lat1, lon1, lat2, lon2):
 def getDeltaTime(transaction1, transaction2):
     time1 = datetime.fromisoformat(transaction1["timestamp"])
     time2 = datetime.fromisoformat(transaction2["timestamp"])
-    delta_time = abs(time1 - time2).total_seconds()/3600
+    delta_time = abs(time1 - time2).total_seconds()/magic.HOUR_TO_SEC
     return delta_time
 
 def getGeoVelocity(transaction1, transaction2):
@@ -46,6 +46,9 @@ class freqSpike:
             self.queue.popleft()
             
         return len(self.queue) >= magic.MAX_LENGTH
+    
+def getDeviceStranger(transaction1, transaction2):
+    return getDeltaTime(transaction1, transaction2) * magic.HOUR_TO_SEC < magic.MAX_DS and transaction1["device_id"] != transaction2["device_id"]
 
 def main():
     data = getInput()
@@ -58,6 +61,9 @@ def main():
             flags.append(flag)
         if freq_spike.check(data[i]):
             flag = json.dumps({'tx_id': data[i]['tx_id'], 'reason': 'FREQ_SPIKE'})
+            flags.append(flag)
+        if i > 0 and getDeviceStranger(data[i - 1], data[i]):
+            flag = json.dumps({'tx_id': data[i]['tx_id'], 'reason': 'DEVICE_STRANGER'})
             flags.append(flag)
     print(flags)
 
