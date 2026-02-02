@@ -1,5 +1,6 @@
 import json, math
 from datetime import datetime, timedelta
+from collections import deque
 import magic
 
 def getInput():
@@ -31,14 +32,32 @@ def getGeoVelocity(transaction1, transaction2):
         return (dis/time) > magic.MAX_SPD
     except ZeroDivisionError:
         return True
+    
+class freqSpike:
+    def __init__(self):
+        self.queue = deque()
+
+    def check(self, transaction):
+        time = datetime.fromisoformat(transaction["timestamp"])
+        self.queue.append(time)
+
+        cutoff_time = time - timedelta(seconds=magic.WINDOW_TIME)
+        while self.queue and self.queue[0] < cutoff_time:
+            self.queue.popleft()
+            
+        return len(self.queue) >= magic.MAX_LENGTH
 
 def main():
     data = getInput()
 
     flags = []
-    for i in range(1, len(data)):
-        if getGeoVelocity(data[i - 1], data[i]):
+    freq_spike = freqSpike()
+    for i in range(len(data)):
+        if i > 0 and getGeoVelocity(data[i - 1], data[i]):
             flag = json.dumps({'tx_id': data[i]['tx_id'], 'reason': 'GEO_VELOCITY'})
+            flags.append(flag)
+        if freq_spike.check(data[i]):
+            flag = json.dumps({'tx_id': data[i]['tx_id'], 'reason': 'FREQ_SPIKE'})
             flags.append(flag)
     print(flags)
 
