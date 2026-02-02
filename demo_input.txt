@@ -1,0 +1,10 @@
+9
+{"tx_id": "T1", "account_id": "A1", "timestamp": "2023-01-01T10:00:00", "amount": 100.0, "location": {"lat": 40.7128, "lon": -74.0060}, "device_id": "D1"}
+{"tx_id": "T2", "account_id": "A1", "timestamp": "2023-01-01T12:00:00", "amount": 1.0, "location": {"lat": 0.0, "lon": 0.0}, "device_id": "D1"}
+{"tx_id": "T3", "account_id": "A1", "timestamp": "2023-01-01T12:01:00", "amount": 1.0, "location": {"lat": 0.0, "lon": 0.0}, "device_id": "D1"}
+{"tx_id": "T4", "account_id": "A1", "timestamp": "2023-01-01T15:00:00", "amount": 10.0, "location": {"lat": 34.0522, "lon": -118.2437}, "device_id": "D1"}
+{"tx_id": "T5", "account_id": "A1", "timestamp": "2023-01-01T12:03:00", "amount": 1.0, "location": {"lat": 0.0, "lon": 0.0}, "device_id": "D1"}
+{"tx_id": "T6", "account_id": "A1", "timestamp": "2023-01-01T12:02:00", "amount": 1.0, "location": {"lat": 0.0, "lon": 0.0}, "device_id": "D1"}
+{"tx_id": "T7", "account_id": "A1", "timestamp": "2023-01-01T10:05:00", "amount": 50.0, "location": {"lat": 48.8566, "lon": 2.3522}, "device_id": "D1"}
+{"tx_id": "T8", "account_id": "A1", "timestamp": "2023-01-01T12:04:00", "amount": 1.0, "location": {"lat": 0.0, "lon": 0.0}, "device_id": "D1"}
+{"tx_id": "T9", "account_id": "A1", "timestamp": "2023-01-01T15:00:15", "amount": 10.0, "location": {"lat": 34.0522, "lon": -118.2437}, "device_id": "D2"}

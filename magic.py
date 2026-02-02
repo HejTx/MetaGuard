@@ -1,5 +1,3 @@
-#stores magic numbers
-
 #Approximate average radius of the earth (in km)
 R = 6371
 
