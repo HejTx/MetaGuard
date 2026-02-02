@@ -28,6 +28,18 @@ def sort(data, left, right):
         sort(data, left, pivot - 1)
         sort(data, pivot + 1, right)
         
+def validateTransaction(transaction):
+    try:
+        lat = int(transaction["location"]["lat"])
+        if lat < -90 or lat > 90:
+            return False
+        lon = int(transaction["location"]["lon"])
+        if lon < -180 or lon > 180:
+            return False
+    except:
+        return False
+    return True
+
 def haversine(lat1, lon1, lat2, lon2):
     delta_lat = math.radians(lat1 - lat2)
     delta_lon = math.radians(lon1 - lon2)
@@ -75,13 +87,15 @@ def main():
     flags = []
     freq_spike = freqSpike()
     for i in range(len(data)):
-        if i > 0 and getGeoVelocity(data[i - 1], data[i]):
+        if not validateTransaction(data[i]):
+            continue
+        if i > 0 and validateTransaction(data[i - 1]) and getGeoVelocity(data[i - 1], data[i]):
             flag = json.dumps({'tx_id': data[i]['tx_id'], 'reason': 'GEO_VELOCITY'})
             flags.append(flag)
         if freq_spike.check(data[i]):
             flag = json.dumps({'tx_id': data[i]['tx_id'], 'reason': 'FREQ_SPIKE'})
             flags.append(flag)
-        if i > 0 and getDeviceStranger(data[i - 1], data[i]):
+        if i > 0 and validateTransaction(data[i - 1]) and getDeviceStranger(data[i - 1], data[i]):
             flag = json.dumps({'tx_id': data[i]['tx_id'], 'reason': 'DEVICE_STRANGER'})
             flags.append(flag)
     print(flags)
