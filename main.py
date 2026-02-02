@@ -4,15 +4,38 @@ from collections import deque
 import magic
 
 def getInput():
+    """
+    Read and parse JSON transaction input from stdin.
+
+    The first line specifies the number of transactions. Each following line
+    must be a valid JSON object representing a transaction.
+
+    Returns:
+        list: A list of parsed transaction dictionaries.
+
+    Raises:
+        ValueError: If the number of transactions is outside the allowed range.
+    """
     n = int(input())
-    if n < 0 or n > 100:
-        return False
+    if n < 0 or n > 10000:
+        return ValueError
     data = []
     for i in range(n):
         data.append(json.loads(input()))
     return data
 
 def partition(data, left, right):
+    """
+    Partition helper for quicksort based on transaction timestamps.
+
+    Args:
+        data (list): List of transaction dictionaries.
+        left (int): Left index of the partition range.
+        right (int): Right index of the partition range.
+
+    Returns:
+        int: Final index position of the pivot.
+    """
     pivot = datetime.fromisoformat(data[right]["timestamp"])
     i = left - 1
     for j in range(left, right):
@@ -24,6 +47,14 @@ def partition(data, left, right):
     return i + 1
 
 def sort(data, left, right):
+    """
+    Sort transactions in-place by timestamp using quicksort.
+
+    Args:
+        data (list): List of transaction dictionaries.
+        left (int): Left index of the sort range.
+        right (int): Right index of the sort range.
+    """
     if left < right:
         pivot = partition(data, left, right)
 
@@ -31,6 +62,15 @@ def sort(data, left, right):
         sort(data, pivot + 1, right)
         
 def validateTransaction(transaction):
+    """
+    Validate geographic coordinates of a transaction.
+
+    Args:
+        transaction (dict): Transaction data containing location info.
+
+    Returns:
+        bool: True if latitude and longitude are valid, False otherwise.
+    """
     try:
         lat = float(transaction["location"]["lat"])
         if lat < -90 or lat > 90:
@@ -43,6 +83,18 @@ def validateTransaction(transaction):
     return True
 
 def haversine(lat1, lon1, lat2, lon2):
+    """
+    Calculate the great-circle distance between two geographic points.
+
+    Args:
+        lat1 (float): Latitude of the first point.
+        lon1 (float): Longitude of the first point.
+        lat2 (float): Latitude of the second point.
+        lon2 (float): Longitude of the second point.
+
+    Returns:
+        float: Distance between the two points.
+    """
     delta_lat = math.radians(lat1 - lat2)
     delta_lon = math.radians(lon1 - lon2)
 
@@ -51,12 +103,33 @@ def haversine(lat1, lon1, lat2, lon2):
     return dis
 
 def getDeltaTime(transaction1, transaction2):
+    """
+    Compute the absolute time difference between two transactions in hours.
+
+    Args:
+        transaction1 (dict): First transaction.
+        transaction2 (dict): Second transaction.
+
+    Returns:
+        float: Time difference in hours.
+    """
     time1 = datetime.fromisoformat(transaction1["timestamp"])
     time2 = datetime.fromisoformat(transaction2["timestamp"])
     delta_time = abs(time1 - time2).total_seconds()/magic.HOUR_TO_SEC
     return delta_time
 
 def getGeoVelocity(transaction1, transaction2):
+    """
+    Determine whether the geographic velocity between two transactions
+    exceeds the maximum allowed speed.
+
+    Args:
+        transaction1 (dict): First transaction.
+        transaction2 (dict): Second transaction.
+
+    Returns:
+        bool: True if velocity exceeds the threshold, False otherwise.
+    """
     dis = haversine(transaction1["location"]["lat"], transaction1["location"]["lon"], transaction2["location"]["lat"], transaction2["location"]["lon"])
     time = getDeltaTime(transaction1, transaction2)
 
@@ -66,10 +139,25 @@ def getGeoVelocity(transaction1, transaction2):
         return True
     
 class freqSpike:
+    """
+    Detect transaction frequency spikes within a rolling time window.
+    """
     def __init__(self):
+        """
+        Initialize an empty transaction timestamp queue.
+        """
         self.queue = deque()
 
     def check(self, transaction):
+        """
+        Check whether the transaction frequency exceeds the allowed limit.
+
+        Args:
+            transaction (dict): Transaction data.
+
+        Returns:
+            bool: True if a frequency spike is detected, False otherwise.
+        """
         time = datetime.fromisoformat(transaction["timestamp"])
         self.queue.append(time)
 
@@ -80,12 +168,22 @@ class freqSpike:
         return len(self.queue) >= magic.MAX_LENGTH
     
 def getDeviceStranger(transaction1, transaction2):
+    """
+    Detect suspicious device switching between transactions.
+
+    Args:
+        transaction1 (dict): First transaction.
+        transaction2 (dict): Second transaction.
+
+    Returns:
+        bool: True if transactions are from different devices within a short time.
+    """
     return getDeltaTime(transaction1, transaction2) * magic.HOUR_TO_SEC < magic.MAX_DS and transaction1["device_id"] != transaction2["device_id"]
 
 def main():
     data = getInput()
-    if data == False:
-        return False
+    if data == ValueError:
+        return
     sort(data, 0, len(data) - 1)
 
     flags = []
