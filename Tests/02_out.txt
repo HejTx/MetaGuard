@@ -1,0 +1,1 @@
+[{\"tx_id\": \"T2\", \"reason\": \"DEVICE_STRANGER\"}]
