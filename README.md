@@ -40,7 +40,7 @@ Input is read from STDIN. The first line contains an integer N (1 <= N <= 10000)
 #### Output
 Output is a single JSON array of objects printed to STDOUT. Each object in the array represents a flagged transaction and includes 'tx_id' and 'reason'. The 'reason' must be one of: 'GEO_VELOCITY', 'FREQ_SPIKE', or 'DEVICE_STRANGER'. The array is sorted primarily by timestamp and secondarily by reason.
 #### Parameter modification
-All magic constants are stored in magic.py. They can be modified to any realistic value
+All magic constants are stored in constants.py. They can be modified to any realistic value
 
 ```python
 #Approximate average radius of the earth (in km)
