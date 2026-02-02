@@ -1,8 +1,8 @@
-import json, math
+import json
+import math
 from datetime import datetime, timedelta
 from collections import deque
-import magic
-
+import constants
 def get_input():
     """
     Read and parse JSON transaction input from stdin.
@@ -99,7 +99,7 @@ def haversine(lat1, lon1, lat2, lon2):
     delta_lon = math.radians(lon1 - lon2)
 
     a = math.sin(delta_lat/2)**2 + math.cos(math.radians(lat1)) * math.cos(math.radians(lat2)) * math.sin(delta_lon/2)**2
-    dis = 2 * magic.R * math.asin(math.sqrt(a))
+    dis = 2 * constants.R * math.asin(math.sqrt(a))
     return dis
 
 def get_delta_time(transaction1, transaction2):
@@ -115,7 +115,7 @@ def get_delta_time(transaction1, transaction2):
     """
     time1 = datetime.fromisoformat(transaction1["timestamp"])
     time2 = datetime.fromisoformat(transaction2["timestamp"])
-    delta_time = abs(time1 - time2).total_seconds()/magic.HOUR_TO_SEC
+    delta_time = abs(time1 - time2).total_seconds()/constants.HOUR_TO_SEC
     return delta_time
 
 def check_geo_velocity(transaction1, transaction2):
@@ -134,7 +134,7 @@ def check_geo_velocity(transaction1, transaction2):
     time = get_delta_time(transaction1, transaction2)
 
     try:
-        return (dis/time) > magic.MAX_SPD
+        return (dis/time) > constants.MAX_SPD
     except ZeroDivisionError:
         return True
     
@@ -161,11 +161,11 @@ class FreqSpike:
         time = datetime.fromisoformat(transaction["timestamp"])
         self.queue.append(time)
 
-        cutoff_time = time - timedelta(seconds=magic.WINDOW_TIME)
+        cutoff_time = time - timedelta(seconds=constants.WINDOW_TIME)
         while self.queue and self.queue[0] < cutoff_time:
             self.queue.popleft()
             
-        return len(self.queue) >= magic.MAX_LENGTH
+        return len(self.queue) >= constants.MAX_LENGTH
     
 def is_device_stranger(transaction1, transaction2):
     """
@@ -178,7 +178,7 @@ def is_device_stranger(transaction1, transaction2):
     Returns:
         bool: True if transactions are from different devices within a short time.
     """
-    return get_delta_time(transaction1, transaction2) * magic.HOUR_TO_SEC < magic.MAX_DS and transaction1["device_id"] != transaction2["device_id"]
+    return get_delta_time(transaction1, transaction2) * constants.HOUR_TO_SEC < constants.MAX_DS and transaction1["device_id"] != transaction2["device_id"]
 
 def main():
     data = get_input()
